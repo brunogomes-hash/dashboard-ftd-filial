@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Operacional - FTD FILIAL</title>
+    <!-- Importando Chart.js para fazer os gráficos idênticos aos da imagem -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f4f6f9; color: #333; }
@@ -12,25 +14,50 @@
         header p { font-size: 14px; color: #94a3b8; margin-top: 5px; }
         .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
         
-        /* Grid de Status das Automações */
+        /* Grid de Status Superior */
         .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .status-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #22c55e; }
         .status-card h3 { font-size: 16px; color: #475569; }
         .status-card .intervalo { font-size: 12px; color: #64748b; margin-top: 4px; }
         .badge { display: inline-block; padding: 3px 8px; background: #dcfce7; color: #15803d; font-size: 11px; font-weight: bold; border-radius: 12px; margin-top: 8px; }
 
-        /* Menu de Abas (Navegação dos Painéis) */
-        .tabs-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; overflow-x: auto; }
-        .tab-btn { background: #e2e8f0; color: #475569; border: none; padding: 10px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; }
+        /* Menu de Abas */
+        .tabs-menu { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .tab-btn { background: #e2e8f0; color: #475569; border: none; padding: 10px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; }
         .tab-btn:hover { background: #cbd5e1; }
         .tab-btn.active { background: #3b82f6; color: white; }
 
-        /* Container do Painel */
-        .dashboard-container { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); padding: 15px; min-height: 700px; }
-        iframe { width: 100%; height: 750px; border: none; border-radius: 4px; display: none; }
-        iframe.active { display: block; }
+        /* Containers Principais */
+        .pane-content { display: none; }
+        .pane-content.active { display: block; }
+        .dashboard-container { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); padding: 15px; }
+        iframe { width: 100%; height: 750px; border: none; border-radius: 4px; }
+
+        /* =========================================================
+           ESTILIZAÇÃO DARK MODE - IGUAL A IMAGEM OUTBOUND GERAL 
+        ========================================================= */
+        .dark-dashboard { background-color: #0b0f19; color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .dark-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #1e293b; padding-bottom: 15px; margin-bottom: 20px; }
+        .dark-header .logos { display: flex; gap: 20px; align-items: center; font-weight: bold; font-size: 20px; }
+        .dark-header h2 { font-size: 26px; letter-spacing: 1px; color: #f8fafc; }
         
-        footer { text-align: center; margin-top: 25px; padding: 20px; color: #64748b; font-size: 13px; }
+        /* Grid de KPls (Cards de cima) */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        .kpi-card { background: #111827; border: 1px solid #1e293b; border-radius: 6px; padding: 12px; text-align: center; }
+        .kpi-card p { font-size: 12px; color: #94a3b8; font-weight: 600; }
+        .kpi-card h4 { font-size: 24px; margin: 5px 0; font-weight: bold; }
+        .kpi-sub { font-size: 11px; color: #64748b; }
+
+        /* Layout dos Gráficos (Esquerda vs Direita) */
+        .dashboard-body { display: grid; grid-template-columns: 3fr 1fr; gap: 20px; }
+        .left-column { display: flex; flex-direction: column; gap: 15px; }
+        
+        /* Mini Cards Laterais da Esquerda */
+        .side-kpi-container { display: flex; flex-direction: column; gap: 10px; width: 150px; }
+        .side-layout { display: flex; gap: 15px; }
+
+        .chart-box { background: #111827; border: 1px solid #1e293b; border-radius: 6px; padding: 15px; position: relative; }
+        .chart-title { font-size: 12px; font-weight: bold; color: #f1f5f9; margin-bottom: 10px; background: #1e293b; display: inline-block; padding: 3px 8px; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -41,29 +68,15 @@
     </header>
 
     <div class="container">
+        <!-- Status de monitoramento -->
         <div class="status-grid">
-            <div class="status-card">
-                <h3>Robô 01: Entrada (ORs)</h3>
-                <p class="intervalo">Looping: a cada 2 minutos</p>
-                <span class="badge">Operacional</span>
-            </div>
-            <div class="status-card">
-                <h3>Robô 02: Armazenagem</h3>
-                <p class="intervalo">Looping: a cada 2 minutos</p>
-                <span class="badge">Operacional</span>
-            </div>
-            <div class="status-card">
-                <h3>Robô 03: Saída (Itens)</h3>
-                <p class="intervalo">Looping: a cada 2 minutos</p>
-                <span class="badge">Operacional</span>
-            </div>
-            <div class="status-card">
-                <h3>Robô 04: Estoque Geral</h3>
-                <p class="intervalo">Looping: a cada 10 minutos</p>
-                <span class="badge">Operacional</span>
-            </div>
+            <div class="status-card"><h3>Robô 01: Entrada (ORs)</h3><p class="intervalo">Looping: 2 min</p><span class="badge">Operacional</span></div>
+            <div class="status-card"><h3>Robô 02: Armazenagem</h3><p class="intervalo">Looping: 2 min</p><span class="badge">Operacional</span></div>
+            <div class="status-card"><h3>Robô 03: Saída (Itens)</h3><p class="intervalo">Looping: 2 min</p><span class="badge">Operacional</span></div>
+            <div class="status-card"><h3>Robô 04: Estoque Geral</h3><p class="intervalo">Looping: 10 min</p><span class="badge">Operacional</span></div>
         </div>
 
+        <!-- Menu de Abas -->
         <div class="tabs-menu">
             <button class="tab-btn active" onclick="mudarAba('entrada', this)">📥 ENTRADA</button>
             <button class="tab-btn" onclick="mudarAba('armazem', this)">📦 ARMAZÉM</button>
@@ -71,15 +84,90 @@
             <button class="tab-btn" onclick="mudarAba('estoque', this)">📊 ESTOQUE</button>
         </div>
 
-        <div class="dashboard-container">
-            <iframe id="entrada" class="active" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vR_PQJjpLBGU9babR2kenjKbLHprWkLFcZwIjBELpgdzCOYlyBbZ-8SwO-p3axVHn29EFxnqKNbGOJx/pubhtml?widget=true&headers=false"></iframe>
-            
-            <iframe id="armazem" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQeb8uBSZR49PZzABI9ewRDdQthSVbZfKj5OPMm9-hOf4lydsexFeDIMjQyFXnGgwXOgCjafbnZ5KnW/pubhtml?widget=true&headers=false"></iframe>
-            
-            <iframe id="saida" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQcFSDDi9Gp-8Hwd3LzvgitWa4NZVvryZMFJqHY_4RrDCMqAzlPffYJAUcnQxaMJ6zUVpWQlyxGXjU0/pubhtml?widget=true&headers=false"></iframe>
-            
-            <iframe id="estoque" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRBfidUmatGnc0wesiyCYJUPDIaJjwe64QI_5VhYd3d_l6jT9sMsUqiyOofJ6GeXgPx2yvX23M68arb/pubhtml?widget=true&headers=false"></iframe>
+        <!-- CONTEÚDO DAS ABAS -->
+        
+        <!-- Aba 1: Entrada -->
+        <div id="pane-entrada" class="pane-content active">
+            <div class="dashboard-container">
+                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vR_PQJjpLBGU9babR2kenjKbLHprWkLFcZwIjBELpgdzCOYlyBbZ-8SwO-p3axVHn29EFxnqKNbGOJx/pubhtml?widget=true&headers=false"></iframe>
+            </div>
         </div>
+
+        <!-- Aba 2: Armazém -->
+        <div id="pane-armazem" class="pane-content">
+            <div class="dashboard-container">
+                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQeb8uBSZR49PZzABI9ewRDdQthSVbZfKj5OPMm9-hOf4lydsexFeDIMjQyFXnGgwXOgCjafbnZ5KnW/pubhtml?widget=true&headers=false"></iframe>
+            </div>
+        </div>
+
+        <!-- Aba 3: SAÍDA (ITENS) - DASHBOARD IDÊNTICO À IMAGEM image_823c5a.png -->
+        <div id="pane-saida" class="pane-content">
+            <div class="dark-dashboard">
+                <div class="dark-header">
+                    <div class="logos">
+                        <span style="color:#0284c7">LUFT</span><span style="color:#94a3b8; font-size:12px; margin-left:5px;">LOGISTICS</span>
+                        <span style="margin-left: 15px; border-left: 1px solid #334155; padding-left: 15px; font-size:16px;">FTD Educação</span>
+                    </div>
+                    <h2>OUTBOUND GERAL</h2>
+                    <div style="font-size: 12px; color: #64748b;">Ult. Atualização: 22/06/2026</div>
+                </div>
+
+                <!-- Cards Principais de Indicadores -->
+                <div class="kpi-grid">
+                    <div class="kpi-card" style="border-left: 4px solid #ef4444;"><p>Forecast Peças</p><h4>0</h4><span class="kpi-sub">Definido como zero</span></div>
+                    <div class="kpi-card"><p>Peças Integradas</p><h4>90.799</h4><span class="kpi-sub">Pedidos: 3.086</span></div>
+                    <div class="kpi-card"><p>Peças Fluxo</p><h4>0</h4><span class="kpi-sub">Pedidos: 0</span></div>
+                    <div class="kpi-card"><p>Em Coleta</p><h4>0</h4><span class="kpi-sub">Pedidos: 0</span></div>
+                    <div class="kpi-card"><p>Em Tratativa</p><h4>0</h4><span class="kpi-sub">Pedidos: 0</span></div>
+                    <div class="kpi-card"><p>Peças Produzidas</p><h4>90.799</h4><span class="kpi-sub">Pedidos: 3.086</span></div>
+                    <div class="kpi-card"><p>Peças Expedidas</p><h4>90.799</h4><span class="kpi-sub">Pedidos: 3.086</span></div>
+                </div>
+
+                <!-- Área dos Gráficos -->
+                <div class="side-layout">
+                    <!-- Cards laterais esquerdos -->
+                    <div class="side-kpi-container">
+                        <div class="kpi-card"><p>Intregado x Fcst</p><h4 style="font-size:18px; color:#22c55e;">203,22%</h4></div>
+                        <div class="kpi-card"><p>Produzido x Fcst</p><h4 style="font-size:18px; color:#22c55e;">203,22%</h4></div>
+                    </div>
+
+                    <!-- Estrutura Principal de Gráficos -->
+                    <div class="dashboard-body" style="flex-grow: 1;">
+                        <div class="left-column">
+                            <!-- Gráfico 1 -->
+                            <div class="chart-box">
+                                <div class="chart-title">Peças Integradas por Data</div>
+                                <canvas id="chartIntegradas" height="110"></canvas>
+                            </div>
+                            <!-- Gráfico 2 -->
+                            <div class="chart-box">
+                                <div class="chart-title">Peças e Pedidos Faturados por Data</div>
+                                <canvas id="chartFaturados" height="110"></canvas>
+                            </div>
+                            <!-- Gráfico 3 -->
+                            <div class="chart-box">
+                                <div class="chart-title">Peças Expedidas por Data</div>
+                                <canvas id="chartExpedidas" height="110"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Coluna Direita (Gráfico de Barras Deitado) -->
+                        <div class="chart-box">
+                            <div class="chart-title">Peças por Data e Status</div>
+                            <canvas id="chartStatus" height="400"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba 4: Estoque -->
+        <div id="pane-estoque" class="pane-content">
+            <div class="dashboard-container">
+                <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRBfidUmatGnc0wesiyCYJUPDIaJjwe64QI_5VhYd3d_l6jT9sMsUqiyOofJ6GeXgPx2yvX23M68arb/pubhtml?widget=true&headers=false"></iframe>
+            </div>
+        </div>
+
     </div>
 
     <footer>
@@ -87,20 +175,66 @@
     </footer>
 
     <script>
-        function mudarAba(idIframe, botaoClicado) {
-            // Esconde todas as planilhas
-            const iframes = document.querySelectorAll('.dashboard-container iframe');
-            iframes.forEach(iframe => iframe.classList.remove('active'));
+        // Lógica de alternar abas
+        function mudarAba(abaId, botao) {
+            document.querySelectorAll('.pane-content').forEach(pane => pane.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             
-            // Remove a classe ativa de todos os botões
-            const botoes = document.querySelectorAll('.tab-btn');
-            botoes.forEach(btn => btn.classList.remove('active'));
-            
-            // Mostra a planilha selecionada e ativa o botão
-            document.getElementById(idIframe).classList.add('active');
-            botaoClicado.classList.add('active');
+            document.getElementById('pane-' + abaId).classList.add('active');
+            botao.classList.add('active');
         }
-    </script>
 
+        // Configurações Globais dos Gráficos para ficarem escuros idênticos ao Looker Studio
+        const datasX = ['04/05', '05/05', '06/05', '07/05', '08/05', '11/05', '12/05', '13/05', '14/05', '15/05', '16/05', '18/05', '19/05', '20/05', '21/05', '22/05', '25/05', '26/05', '27/05', '28/05', '29/05'];
+        const valoresY = [2534, 1492, 3192, 1512, 1566, 3328, 4857, 1508, 5817, 3427, 407, 1316, 3822, 265, 1166, 1205, 3885, 6223, 40334, 2943];
+
+        const chartOptions = {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#94a3b8', fontSize: 10 } },
+                y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
+            }
+        };
+
+        // Renderizar Gráfico 1: Integradas (Barras Azuis)
+        new Chart(document.getElementById('chartIntegradas'), {
+            type: 'bar',
+            data: { labels: datasX, datasets: [{ data: valoresY, backgroundColor: '#3b82f6' }] },
+            options: chartOptions
+        });
+
+        // Renderizar Gráfico 2: Faturados (Linha)
+        new Chart(document.getElementById('chartFaturados'), {
+            type: 'line',
+            data: { labels: datasX, datasets: [{ data: valoresY, borderColor: '#3b82f6', tension: 0.2, pointRadius: 2 }] },
+            options: chartOptions
+        });
+
+        // Renderizar Gráfico 3: Expedidas (Barras Azuis)
+        new Chart(document.getElementById('chartExpedidas'), {
+            type: 'bar',
+            data: { labels: datasX, datasets: [{ data: valoresY, backgroundColor: '#3b82f6' }] },
+            options: chartOptions
+        });
+
+        // Renderizar Gráfico Lateral: Status (Barras Horizontais)
+        new Chart(document.getElementById('chartStatus'), {
+            type: 'bar',
+            data: { 
+                labels: [...datasX].reverse(), 
+                datasets: [{ data: [...valoresY].reverse(), backgroundColor: '#3b82f6' }] 
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                    y: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

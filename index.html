@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Operacional - FTD FILIAL</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; }
+        header { background-color: #1e293b; color: white; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        header h1 { font-size: 24px; }
+        header p { font-size: 14px; color: #94a3b8; margin-top: 5px; }
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+        
+        /* Grid de Status das Automações */
+        .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .status-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #22c55e; }
+        .status-card.active { border-left-color: #22c55e; }
+        .status-card h3 { font-size: 16px; color: #475569; }
+        .status-card .intervalo { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .badge { display: inline-block; padding: 3px 8px; background: #dcfce7; color: #15803d; font-size: 11px; font-weight: bold; border-radius: 12px; margin-top: 8px; }
+
+        /* Espaço para o Iframe do Looker Studio / Planilha */
+        .dashboard-container { background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); padding: 15px; min-height: 700px; }
+        iframe { width: 100%; height: 750px; border: none; border-radius: 4px; }
+        
+        footer { text-align: center; margin-top: 4px; padding: 20px; color: #64748b; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Dashboard Operacional - FTD FILIAL</h1>
+        <p>Monitoramento e Sincronização Automatizada Silt WMS & Google Sheets</p>
+    </header>
+
+    <div class="container">
+        <div class="status-grid">
+            <div class="status-card">
+                <h3>Robô 01: Entrada (ORs)</h3>
+                <p class="intervalo">Looping: a cada 2 minutos</p>
+                <span class="badge">Operacional</span>
+            </div>
+            <div class="status-card">
+                <h3>Robô 02: Armazenagem</h3>
+                <p class="intervalo">Looping: a cada 2 minutos</p>
+                <span class="badge">Operacional</span>
+            </div>
+            <div class="status-card">
+                <h3>Robô 03: Itens (Série 32)</h3>
+                <p class="intervalo">Looping: a cada 2 minutos</p>
+                <span class="badge">Operacional</span>
+            </div>
+            <div class="status-card">
+                <h3>Robô 04: Estoque Geral</h3>
+                <p class="intervalo">Looping: a cada 10 minutos</p>
+                <span class="badge">Operacional</span>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <iframe src="https://lookerstudio.google.com/embed/reporting/SEU_ID_DO_LOOKER_STUDIO_AQUI/page/REPLACE_ME" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <footer>
+        Desenvolvido para Luft Solutions - Unidade Cajamar 16 &copy; 2026
+    </footer>
+
+</body>
+</html>
